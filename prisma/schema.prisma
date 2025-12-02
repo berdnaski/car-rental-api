@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Car {
+  id           String   @id @default(uuid())
+  licensePlate String   @unique
+  color        String
+  brand        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  usages CarUsage[]
+  
+  @@map("cars")
+}
+
+model Driver {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  usages CarUsage[]
+  
+  @@map("drivers")
+}
+
+model CarUsage {
+  id        String   @id @default(uuid())
+  startDate DateTime
+  endDate   DateTime?
+  reason    String
+  
+  carId    String
+  car      Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  
+  driverId String
+  driver   Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([carId, startDate])
+  @@index([driverId, startDate])
+  @@unique([carId, startDate, endDate])
+  
+  @@map("car_usages")
+}
